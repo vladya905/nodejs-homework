@@ -4,6 +4,7 @@ import { ctrlWrapper } from "../decorators/index.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
 import "dotenv/config"
+import gravatar from "gravatar"
 
 const {JWT_SECRET} = process.env;
 
@@ -17,11 +18,12 @@ async function signup(req, res) {
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await User.create({ ...req.body, password: hashPassword });
+const avatarURL = gravatar.url(email)
+    const newUser = await User.create({ ...req.body, password: hashPassword, avatar: avatarURL });
     res.status(201).json({
         email: newUser.email,
-        subscription: newUser.subscription
+        subscription: newUser.subscription,
+        avatar: newUser.avatar
     });
 
 };

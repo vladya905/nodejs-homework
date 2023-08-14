@@ -12,6 +12,7 @@ const userLoginValidate = validateBody(usersSchemas.userLoginSchemas);
 authRouter.post('/users/register', userSignupValidate, authController.signup);
 authRouter.post('/users/login', userLoginValidate, authController.signin);
 authRouter.get('/users/current', autenticate, authController.getCurrent);
-authRouter.post('/users/logout', autenticate, authController.signout)
+authRouter.post('/users/logout', autenticate, authController.signout);
+
 
 export default authRouter;
