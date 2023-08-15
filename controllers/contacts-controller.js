@@ -3,6 +3,7 @@ import { HttpError} from "../helpers/index.js";
 import { ctrlWrapper } from "../decorators/index.js";
 import fs from "fs/promises";
 import path from 'path';
+import jimp from "jimp"
 
 
 
@@ -22,10 +23,13 @@ const getAll = async (req, res) => {
  };
 
 const avatarDir = path.resolve("public", "avatars");
+
 const add = async (req, res) => {
      const { _id: owner } = req.user;
      const { path: oldPath, filename } = req.file;
-     const avatarName = `${owner}_${filename}`
+    const avatarName = `${owner}_${filename}`
+    const image = await jimp.read(avatar);
+    await image.resize(250, 250).writeAsync(avatar);
      const newPath = path.join(avatarDir, avatarName);
      await fs.rename(oldPath, newPath);
      const avatarURL = path.join("avatars", avatarName);

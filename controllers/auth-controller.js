@@ -4,7 +4,10 @@ import { ctrlWrapper } from "../decorators/index.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
 import "dotenv/config"
+import fs from "fs/promises"
 import gravatar from "gravatar"
+import path from 'path'
+import jimp from "jimp"
 
 const {JWT_SECRET} = process.env;
 
@@ -18,7 +21,7 @@ async function signup(req, res) {
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
-const avatarURL = gravatar.url(email)
+    const avatarURL = gravatar.url(email)
     const newUser = await User.create({ ...req.body, password: hashPassword, avatar: avatarURL });
     res.status(201).json({
         email: newUser.email,
@@ -48,10 +51,11 @@ const signin = async (req, res) => {
 };
 
 const getCurrent = (req, res) => {
-    const { email, subscription } = req.user;
+    const { email, subscription, avatar } = req.user;
     res.json({
         email,
-        subscription
+        subscription,
+        avatar
     })
 };
 
@@ -60,9 +64,32 @@ const signout = async (req, res) => {
     await User.findByIdAndUpdate(_id, {token: ""})
     res.status(204).json()
 }
+
+const avatarDir = path.resolve("public", "avatars");
+
+const updateAvatar = async (req, res) => {
+    const { _id} = req.user;
+    
+     const { path: avatar, filename } = req.file;
+    const avatarName = `${_id}_${filename}`;
+    const newPath = path.join(avatarDir, avatarName);
+    const image = await jimp.read(avatar);
+    await image.resize(250, 250).writeAsync(avatar);
+    await fs.rename(avatar, newPath);
+    const avatarURL = path.join("/avatars", avatarName);
+    const user = await User.findById(_id);
+    if (!user) {
+        throw HttpError(401, "Not authorized");
+    }
+    user.avatar = avatarURL;
+    await user.save(); 
+    
+    res.status(200).json({ avatarURL: user.avatar });
+}
 export default {
     signup: ctrlWrapper(signup),
     signin: ctrlWrapper(signin),
     getCurrent: ctrlWrapper(getCurrent),
-    signout: ctrlWrapper(signout)
+    signout: ctrlWrapper(signout),
+    updateAvatar: ctrlWrapper(updateAvatar)
 }
