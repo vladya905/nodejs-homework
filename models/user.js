@@ -23,7 +23,15 @@ const userSchema = new Schema({
   avatar: {
     type: String,
   },
-   token: String
+  verify: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: {
+    type: String,
+    required: [true, 'Verify token is required'],
+  },
+token: String
 }, { versionKey: false});
 
 userSchema.pre("findOneAndUpdate", runValidateAtUpdate);
