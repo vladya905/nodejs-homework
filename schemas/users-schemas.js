@@ -12,7 +12,12 @@ const userLoginSchemas = Joi.object({
     password: Joi.string().required().min(6),
 });
 
+const userEmailSchemas = Joi.object({
+    email: Joi.string().pattern(emailRegexp).required(),
+});
+
 export default {
     userSignupSchemas,
-    userLoginSchemas
+    userLoginSchemas,
+    userEmailSchemas
 }
